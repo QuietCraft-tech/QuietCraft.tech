@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QuietCraft.tech — Quiet software, carefully made.</title>
   <meta name="description" content="QuietCraft builds calm, human-centered software tools. QuietScribe is our offline transcription app for privacy-focused professionals — lawyers, journalists, researchers.">
-  <meta name="theme-color" content="#F9F7F4">
+  <meta name="theme-color" content="#F9F7F4" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1B1917" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
 
   <link rel="stylesheet" href="css/main.css">
 
@@ -170,7 +172,7 @@
       gap: 6px;
       padding: 12px 20px;
       border: 1px solid var(--border);
-      background: white;
+      background: var(--surface);
       margin-bottom: 36px;
     }
     .price-amount {
@@ -244,7 +246,7 @@
 
     /* App window mockup */
     .mockup-window {
-      background: white;
+      background: var(--surface);
       border: 1px solid var(--border);
       box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 20px 56px rgba(0,0,0,0.06);
       overflow: hidden;
@@ -303,7 +305,7 @@
     .for-whom-box {
       padding: 18px 22px;
       border: 1px solid var(--border);
-      background: white;
+      background: var(--surface);
     }
     .for-whom-label {
       font-size: 0.72rem;
@@ -384,7 +386,7 @@
       padding: 13px 18px;
       border: 1.5px solid var(--border);
       border-right: none;
-      background: white;
+      background: var(--surface);
       color: var(--text);
       outline: none;
       transition: border-color 0.3s;
@@ -471,7 +473,7 @@
       font-size: 0.9375rem;
       padding: 13px 17px;
       border: 1.5px solid var(--border);
-      background: white;
+      background: var(--surface);
       color: var(--text);
       outline: none;
       width: 100%;
@@ -494,6 +496,64 @@
     }
     .modal-btn:hover { background: #5a7d9e; box-shadow: 0 4px 20px rgba(108,145,178,0.3); }
     .modal-note { font-size: 0.8125rem; opacity: 0.38; text-align: center; font-style: italic; }
+
+    /* ── SVG theme — CSS props override SVG presentation attributes ── */
+    /* Hero animation: outer/dashed rings use border color */
+    .logo-anim > circle:nth-child(1),
+    .logo-anim > circle:nth-child(3) { stroke: var(--border); }
+    /* Orbiting dot */
+    .logo-anim .anim-orbit > circle  { fill: var(--accent-blue); }
+    /* Crescent */
+    .logo-anim .anim-breathe > circle { stroke: var(--accent-blue); fill: none; }
+    .logo-anim .anim-breathe > path:first-child { fill: var(--accent-blue); stroke: var(--accent-blue); }
+    .logo-anim .anim-breathe > path:last-child  { stroke: var(--accent-blue); fill: none; }
+    /* Centre dots */
+    .logo-anim > circle:nth-child(6),
+    .logo-anim > circle:nth-child(7) { fill: var(--accent-blue); }
+    /* Needle & thread */
+    .logo-anim .anim-float > line,
+    .logo-anim .anim-float > ellipse { stroke: var(--accent-green); }
+    .logo-anim .anim-float > path    { stroke: var(--accent-green); fill: none; }
+    .logo-anim .anim-float > circle  { fill: var(--accent-green); }
+
+    /* Philosophy icons */
+    .philo-icon path, .philo-icon rect, .philo-icon line { stroke: var(--accent-green); }
+
+    /* No-JS fallback — keep content readable if scripts are blocked */
+    @media (scripting: none) {
+      .reveal { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Dark mode overrides ── */
+    @media (prefers-color-scheme: dark) {
+      .mockup-window {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 20px 56px rgba(0,0,0,0.4);
+      }
+      .mockup-window:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.35), 0 28px 72px rgba(0,0,0,0.5);
+      }
+      .product-cta:hover {
+        box-shadow: 0 6px 24px rgba(122, 172, 200, 0.22);
+      }
+      .modal {
+        box-shadow: 0 8px 48px rgba(0,0,0,0.5);
+        background: var(--surface);
+      }
+      .modal-overlay {
+        background: rgba(0, 0, 0, 0.7);
+      }
+      .mic-wrap svg [stroke="#6C91B2"] { stroke: #7AACC8; }
+      .mic-wrap svg [fill="#6C91B2"]   { fill:   #7AACC8; }
+      .mic-wrap svg [stroke="#8A9A7A"] { stroke: #94A882; }
+      .mic-wrap svg [fill="#8A9A7A"]   { fill:   #94A882; }
+      /* Mic body and lock body: hardcoded light fills need dark equivalents */
+      .mic-wrap svg [fill="#EEF3F8"]   { fill: var(--surface); }
+      .mic-wrap svg [fill="#F9F7F4"]   { fill: var(--bg); }
+      /* Feature list checkmark — update to dark-mode green */
+      .feature-item::before {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='9' cy='9' r='8' stroke='%2394A882' stroke-width='1.2'/%3E%3Cpath d='M5.5 9L8 11.5L12.5 7' stroke='%2394A882' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      }
+    }
   </style>
 </head>
 <body>

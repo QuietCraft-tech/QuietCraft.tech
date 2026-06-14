@@ -8,7 +8,9 @@
 
 /* ── Variables ─────────────────────────────────── */
 :root {
+  color-scheme:   light dark;
   --bg:           #F9F7F4;
+  --surface:      #FFFFFF;
   --text:         #2C2A29;
   --accent-blue:  #6C91B2;
   --accent-green: #8A9A7A;
@@ -187,6 +189,11 @@ img, svg { display: block; max-width: 100%; }
 .nav-logo .logo-icon   { width: 26px; height: 26px; flex-shrink: 0; }
 .nav-logo .logo-dot    { color: var(--accent-blue); }
 
+/* Logo SVG — CSS props override SVG presentation attrs; inherit dark-mode vars */
+.logo-icon > circle:first-child { stroke: var(--accent-blue); }
+.logo-icon > path               { fill:   var(--accent-blue); }
+.logo-icon > circle:last-child  { fill:   var(--accent-green); }
+
 .nav-links {
   display: flex;
   align-items: center;
@@ -313,4 +320,26 @@ img, svg { display: block; max-width: 100%; }
 
 @media (max-width: 640px) {
   .footer-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
+}
+
+/* ── Dark mode ──────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:           #1B1917;
+    --surface:      #252220;
+    --text:         #EDE9E4;
+    --accent-blue:  #7AACC8;
+    --accent-green: #94A882;
+    --hover:        #8A8480;
+    --border:       #2E2B28;
+  }
+
+  .nav.scrolled {
+    background: rgba(27, 25, 23, 0.94);
+  }
+
+  /* Soften heavy shadows — they read too loud on dark backgrounds */
+  .btn-outline:hover {
+    box-shadow: 0 4px 20px rgba(122, 172, 200, 0.18);
+  }
 }
