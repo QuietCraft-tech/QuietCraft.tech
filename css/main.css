@@ -8,14 +8,14 @@
 
 /* ── Variables ─────────────────────────────────── */
 :root {
-  color-scheme:   light dark;
-  --bg:           #F9F7F4;
-  --surface:      #FFFFFF;
-  --text:         #2C2A29;
-  --accent-blue:  #6C91B2;
-  --accent-green: #8A9A7A;
-  --hover:        #AFA9A0;
-  --border:       #E5E2DC;
+  color-scheme:   dark;
+  --bg:           #0F0E0C;
+  --surface:      #181613;
+  --text:         #E8E4DF;
+  --accent-blue:  #7AACC8;
+  --accent-green: #94A882;
+  --hover:        #7A756F;
+  --border:       #232019;
   --max-width:    1200px;
   --section-pad:  clamp(80px, 10vw, 140px);
   --font-head:    'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
@@ -164,9 +164,9 @@ img, svg { display: block; max-width: 100%; }
   transition: background 0.4s ease, padding 0.4s ease, box-shadow 0.4s ease;
 }
 .nav.scrolled {
-  background: rgba(249, 247, 244, 0.93);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(15, 14, 12, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   padding: 14px 0;
   box-shadow: 0 1px 0 var(--border);
 }
@@ -322,24 +322,5 @@ img, svg { display: block; max-width: 100%; }
   .footer-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
 }
 
-/* ── Dark mode ──────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg:           #1B1917;
-    --surface:      #252220;
-    --text:         #EDE9E4;
-    --accent-blue:  #7AACC8;
-    --accent-green: #94A882;
-    --hover:        #8A8480;
-    --border:       #2E2B28;
-  }
-
-  .nav.scrolled {
-    background: rgba(27, 25, 23, 0.94);
-  }
-
-  /* Soften heavy shadows — they read too loud on dark backgrounds */
-  .btn-outline:hover {
-    box-shadow: 0 4px 20px rgba(122, 172, 200, 0.18);
-  }
-}
+/* nav-logo img sizing (used on blog pages) */
+.nav-logo img { width: 26px; height: 26px; object-fit: contain; }
