@@ -4,555 +4,342 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QuietCraft.tech — Quiet software, carefully made.</title>
-  <meta name="description" content="QuietCraft builds calm, human-centered software tools. QuietScribe is our offline transcription app for privacy-focused professionals — lawyers, journalists, researchers.">
-  <meta name="theme-color" content="#F9F7F4" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#1B1917" media="(prefers-color-scheme: dark)">
-  <meta name="color-scheme" content="light dark">
-
-  <link rel="stylesheet" href="css/main.css">
-
+  <meta name="description" content="QuietCraft builds calm, offline software for people who do careful work. QuietScribe: private transcription with no cloud, no accounts.">
+  <meta name="theme-color" content="#0F0E0C">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Quicksand:wght@500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    /* ── Hero ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    :root {
+      --bg:      #0F0E0C;
+      --surface: #181613;
+      --text:    #E8E4DF;
+      --muted:   #7A756F;
+      --dim:     #3E3A36;
+      --border:  #232019;
+      --green:   #94A882;
+      --blue:    #7AACC8;
+      --pad:     clamp(22px, 5.5vw, 68px);
+      --max:     1080px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    img { display: block; max-width: 100%; }
+
+    .container {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 var(--pad);
+    }
+
+    /* Skip link */
+    .skip-link {
+      position: absolute; top: -100%; left: 20px;
+      background: var(--text); color: var(--bg);
+      padding: 8px 16px; font-size: 0.875rem;
+      z-index: 10000; transition: top 0.2s;
+    }
+    .skip-link:focus { top: 0; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+    :focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+    /* ── Nav ─────────────────────────────────────── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100; padding: 22px 0;
+      border-bottom: 1px solid transparent;
+      transition: background 0.4s, padding 0.4s, border-color 0.4s;
+    }
+    .nav.scrolled {
+      background: rgba(15, 14, 12, 0.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 14px 0;
+      border-color: var(--border);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 9px;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 600; font-size: 1rem; letter-spacing: -0.01em;
+      color: var(--text); opacity: 0.88;
+    }
+    .nav-logo img { width: 26px; height: 26px; object-fit: contain; }
+    .nav-logo .dot { color: var(--blue); opacity: 1; }
+    .nav-links { display: flex; gap: 34px; align-items: center; }
+    .nav-links a {
+      font-size: 0.8125rem; font-weight: 400; letter-spacing: 0.04em;
+      color: var(--muted); transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer; padding: 4px;
+    }
+    .hamburger span {
+      display: block; width: 22px; height: 1.5px;
+      background: var(--text); transform-origin: center;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none; position: fixed; inset: 0;
+      background: var(--bg); z-index: 99;
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 40px; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .mobile-menu.open { opacity: 1; pointer-events: all; }
+    .mobile-menu a {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem; font-weight: 300;
+      color: var(--text); opacity: 0.7; transition: opacity 0.2s, color 0.2s;
+    }
+    .mobile-menu a:hover { opacity: 1; color: var(--blue); }
+
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { display: flex; }
+    }
+
+    /* ── Hero ────────────────────────────────────── */
     .hero {
       min-height: 100svh;
-      display: flex;
-      align-items: center;
-      padding-top: 80px;
-      padding-bottom: var(--section-pad);
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 130px var(--pad) 80px;
+      max-width: var(--max); margin: 0 auto;
     }
-    .hero-inner {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 60px;
-      align-items: center;
+    .hero-label {
+      font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--green); margin-bottom: 28px;
+      display: flex; align-items: center; gap: 14px;
     }
-    .hero-text { max-width: 520px; }
-
-    .hero-eyebrow {
-      font-size: 0.8rem;
-      font-weight: 500;
-      letter-spacing: 0.13em;
-      text-transform: uppercase;
-      color: var(--accent-green);
-      margin-bottom: 22px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .hero-eyebrow::before {
-      content: '';
-      display: block;
-      width: 26px;
-      height: 1px;
-      background: var(--accent-green);
+    .hero-label::before {
+      content: ''; display: block;
+      width: 28px; height: 1px; background: var(--green);
     }
     .hero-headline {
-      font-family: var(--font-head);
-      font-size: clamp(2.8rem, 5vw, 4.4rem);
-      font-weight: 300;
-      line-height: 1.1;
-      letter-spacing: -0.015em;
-      margin-bottom: 22px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.4rem, 7.5vw, 6.2rem);
+      font-weight: 300; line-height: 1.04;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px; max-width: 820px;
     }
-    .hero-headline em { font-style: italic; color: var(--accent-blue); }
-    .hero-subhead {
-      font-size: 1.0625rem;
-      font-weight: 300;
-      line-height: 1.75;
-      opacity: 0.7;
-      margin-bottom: 44px;
-      max-width: 420px;
+    .hero-headline em { font-style: italic; color: var(--blue); }
+    .hero-sub {
+      font-size: 1rem; font-weight: 300; line-height: 1.85;
+      color: var(--muted); margin-bottom: 54px; max-width: 460px;
     }
-
-    /* Hero visual */
-    .hero-visual {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem; font-weight: 500; letter-spacing: 0.04em;
+      color: var(--text); border: 1px solid var(--dim);
+      padding: 13px 26px; align-self: flex-start;
+      transition: border-color 0.3s, background 0.3s;
     }
-    .logo-anim { width: 340px; height: 340px; }
+    .hero-cta:hover {
+      border-color: var(--blue);
+      background: rgba(122, 172, 200, 0.07);
+    }
+    .hero-cta svg { flex-shrink: 0; transition: transform 0.3s; }
+    .hero-cta:hover svg { transform: translateX(4px); }
 
-    /* Animations */
-    .anim-orbit  { animation: qc-orbit   18s linear     infinite; transform-origin: 170px 170px; }
-    .anim-breathe{ animation: qc-breathe  6s ease-in-out infinite; transform-origin: 170px 170px; }
-    .anim-float  { animation: qc-float    4s ease-in-out infinite; }
-
-    @keyframes qc-orbit   { to { transform: rotate(360deg); } }
-    @keyframes qc-breathe { 0%,100% { transform: scale(1);    opacity: 0.9; }
-                            50%     { transform: scale(1.04); opacity: 1;   } }
-    @keyframes qc-float   { 0%,100% { transform: translateY(0);   }
-                            50%     { transform: translateY(-9px); } }
-
-    @media (max-width: 920px) {
-      .hero-inner     { grid-template-columns: 1fr; text-align: center; }
-      .hero-text      { max-width: 100%; margin: 0 auto; }
-      .hero-eyebrow   { justify-content: center; }
-      .hero-subhead   { max-width: 100%; margin-left: auto; margin-right: auto; }
-      .hero-visual    { order: -1; }
-      .logo-anim      { width: 220px; height: 220px; }
+    /* ── Divider ─────────────────────────────────── */
+    .divider {
+      border: none; border-top: 1px solid var(--border); margin: 0;
     }
 
-    /* ── Philosophy ─────────────────────────────── */
-    .philosophy       { padding: var(--section-pad) 0; }
-    .philosophy-grid  {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 60px;
-    }
-    .philo-item  { display: flex; flex-direction: column; gap: 18px; }
-    .philo-icon  { width: 40px; height: 40px; }
-    .philo-title {
-      font-family: var(--font-head);
-      font-size: 1.5rem;
-      font-weight: 400;
-      line-height: 1.2;
-    }
-    .philo-text  { font-size: 0.9375rem; line-height: 1.8; opacity: 0.68; }
-
-    @media (max-width: 768px) {
-      .philosophy-grid { grid-template-columns: 1fr; gap: 48px; }
-    }
-
-    /* ── Product — QuietScribe ──────────────────── */
+    /* ── Product ─────────────────────────────────── */
     .product {
-      padding: var(--section-pad) 0;
-      background: linear-gradient(180deg, transparent,
-                  rgba(108,145,178,0.05) 25%, rgba(108,145,178,0.05) 75%, transparent);
+      padding: clamp(72px, 10vw, 120px) var(--pad);
+      max-width: var(--max); margin: 0 auto;
     }
     .product-inner {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: start;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 80px; align-items: start;
     }
 
-    .product-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--accent-blue);
-      margin-bottom: 18px;
+    .product-tag {
+      display: flex; align-items: center; gap: 9px;
+      font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 20px;
     }
-    .badge-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent-blue);
-      animation: badge-pulse 2.5s ease-in-out infinite;
+    .pulse {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--blue);
+      animation: pulse 2.5s ease-in-out infinite;
     }
-    @keyframes badge-pulse {
-      0%,100% { opacity:1; transform:scale(1);   }
-      50%      { opacity:0.4; transform:scale(0.7); }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.3; transform: scale(0.6); }
     }
 
-    .product-headline {
-      font-family: var(--font-head);
-      font-size: clamp(1.9rem, 3.5vw, 3rem);
-      font-weight: 400;
-      line-height: 1.14;
-      letter-spacing: -0.01em;
-      margin-bottom: 16px;
+    .product-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 3.8vw, 3rem);
+      font-weight: 400; line-height: 1.12;
+      letter-spacing: -0.01em; margin-bottom: 16px;
     }
-    .product-headline em { font-style: italic; color: var(--accent-blue); }
-
-    .product-subhead {
-      font-size: 1rem;
-      line-height: 1.75;
-      opacity: 0.66;
-      margin-bottom: 30px;
+    .product-name em { font-style: italic; color: var(--blue); }
+    .product-desc {
+      font-size: 0.9375rem; line-height: 1.82;
+      color: var(--muted); margin-bottom: 32px;
     }
 
-    /* Price block */
-    .price-block {
-      display: inline-flex;
-      align-items: baseline;
-      gap: 6px;
-      padding: 12px 20px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      margin-bottom: 36px;
-    }
-    .price-amount {
-      font-family: var(--font-head);
-      font-size: 2.5rem;
-      font-weight: 500;
-      line-height: 1;
-    }
-    .price-once  { font-size: 0.8125rem; opacity: 0.5; }
-    .price-divider {
-      width: 1px; height: 26px;
-      background: var(--border);
-      align-self: center;
-      margin: 0 4px;
-    }
-    .price-unlimited { font-size: 0.8125rem; color: var(--accent-green); font-weight: 500; }
-
-    /* Features list */
-    .features-list  { display: flex; flex-direction: column; gap: 11px; margin-bottom: 40px; }
-    .feature-item   {
-      display: flex;
-      align-items: flex-start;
-      gap: 13px;
-      font-size: 0.9375rem;
-      line-height: 1.55;
-      opacity: 0.8;
-    }
-    .feature-item::before {
-      content: '';
-      display: block;
-      width: 18px; height: 18px; min-width: 18px;
-      margin-top: 1px;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='9' cy='9' r='8' stroke='%238A9A7A' stroke-width='1.2'/%3E%3Cpath d='M5.5 9L8 11.5L12.5 7' stroke='%238A9A7A' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-size: contain;
-      background-repeat: no-repeat;
-    }
-
-    /* CTA */
-    .product-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-family: var(--font-body);
-      font-size: 0.9375rem;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      color: white;
-      background: var(--accent-blue);
-      border: 1.5px solid var(--accent-blue);
-      padding: 14px 30px;
-      cursor: pointer;
-      transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
-    }
-    .product-cta:hover {
-      background: #5a7d9e;
-      border-color: #5a7d9e;
-      box-shadow: 0 6px 24px rgba(108,145,178,0.32);
-      transform: translateY(-1px);
-    }
-    .product-status {
-      margin-top: 14px;
-      font-size: 0.8125rem;
-      opacity: 0.45;
-      font-style: italic;
-    }
-
-    /* Right column visual */
-    .product-visual { display: flex; flex-direction: column; gap: 20px; }
-
-    .mic-wrap { text-align: center; padding: 20px 0 8px; }
-
-    /* App window mockup */
-    .mockup-window {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 20px 56px rgba(0,0,0,0.06);
-      overflow: hidden;
-      transition: box-shadow 0.4s;
-    }
-    .mockup-window:hover {
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05), 0 28px 72px rgba(0,0,0,0.1);
-    }
-    .mockup-bar {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 11px 15px;
+    .price {
+      display: flex; align-items: baseline; gap: 12px;
+      margin-bottom: 36px; padding-bottom: 32px;
       border-bottom: 1px solid var(--border);
-      background: var(--bg);
     }
-    .mdot { width: 10px; height: 10px; border-radius: 50%; }
-    .mdot-r { background: #F4C4BD; }
-    .mdot-y { background: #F4DCBD; }
-    .mdot-g { background: #C4D9BD; }
-    .mbar-title { font-size: 0.75rem; opacity: 0.45; margin: 0 auto; letter-spacing: 0.02em; }
-    .mockup-body { padding: 28px; }
-    .dropzone {
-      border: 1.5px dashed var(--border);
-      padding: 32px 16px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 9px;
-      transition: border-color 0.3s, background 0.3s;
-      cursor: default;
+    .price-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.6rem; font-weight: 400; line-height: 1;
     }
-    .dropzone:hover {
-      border-color: var(--accent-blue);
-      background: rgba(108,145,178,0.03);
-    }
-    .dz-label { font-size: 0.875rem; opacity: 0.48; }
-    .dz-sub   { font-size: 0.75rem; opacity: 0.32; }
-    .file-queue { margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
-    .file-row {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      padding: 9px 11px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-    }
-    .ficon { width: 26px; height: 26px; border-radius: 3px; flex-shrink: 0; }
-    .fname { font-size: 0.8rem; opacity: 0.68; flex: 1; }
-    .fstat { font-size: 0.75rem; }
-    .fstat-done   { color: var(--accent-green); }
-    .fstat-active { color: var(--accent-blue); }
-    .fstat-queue  { color: var(--hover); }
+    .price-info { font-size: 0.8125rem; color: var(--muted); line-height: 1.55; }
+    .price-info span { display: block; color: var(--green); }
 
-    .for-whom-box {
-      padding: 18px 22px;
-      border: 1px solid var(--border);
-      background: var(--surface);
+    .features {
+      display: flex; flex-direction: column; gap: 10px;
+      margin-bottom: 0;
     }
-    .for-whom-label {
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--hover);
-      margin-bottom: 9px;
+    .features li {
+      font-size: 0.9rem; line-height: 1.6;
+      color: var(--muted); padding-left: 20px; position: relative;
     }
-    .for-whom-text { font-size: 0.9rem; line-height: 1.7; opacity: 0.68; }
-
-    @media (max-width: 920px) {
-      .product-inner  { grid-template-columns: 1fr; gap: 56px; }
-      .product-visual { order: -1; }
+    .features li::before {
+      content: '—'; position: absolute; left: 0; color: var(--dim);
     }
 
-    /* ── Testimonial ─────────────────────────────── */
-    .testimonial       { padding: var(--section-pad) 0; text-align: center; }
-    .testimonial-inner { max-width: 700px; margin: 0 auto; }
-    .tq-open {
-      font-family: var(--font-head);
-      font-size: 5.5rem;
-      line-height: 0.45;
-      color: var(--accent-blue);
-      opacity: 0.2;
-      display: block;
-      margin-bottom: 8px;
+    /* ── Waitlist col ────────────────────────────── */
+    .waitlist-col { padding-top: 6px; }
+    .waitlist-head {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.65rem, 2.6vw, 2.25rem);
+      font-weight: 300; line-height: 1.2; margin-bottom: 14px;
     }
-    .tq-quote {
-      font-family: var(--font-head);
-      font-size: clamp(1.5rem, 3.2vw, 2.25rem);
-      font-weight: 300;
-      font-style: italic;
-      line-height: 1.45;
-      letter-spacing: 0.01em;
-      margin-bottom: 28px;
-    }
-    .tq-attr {
-      font-size: 0.875rem;
-      opacity: 0.45;
-      letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-    }
-    .tq-attr::before, .tq-attr::after {
-      content: '';
-      display: block;
-      width: 22px;
-      height: 1px;
-      background: var(--border);
+    .waitlist-sub {
+      font-size: 0.9rem; line-height: 1.82;
+      color: var(--muted); margin-bottom: 32px;
     }
 
-    /* ── Waitlist section ────────────────────────── */
-    .waitlist { padding: var(--section-pad) 0; border-top: 1px solid var(--border); }
-    .waitlist-inner {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: center;
-    }
-    .waitlist-headline {
-      font-family: var(--font-head);
-      font-size: clamp(1.8rem, 3vw, 2.7rem);
-      font-weight: 400;
-      line-height: 1.18;
-      margin-bottom: 14px;
-    }
-    .waitlist-sub { font-size: 0.9375rem; line-height: 1.75; opacity: 0.62; }
-
-    .waitlist-form { display: flex; flex-direction: column; gap: 11px; }
-    .form-row      { display: flex; }
+    .form-row { display: flex; margin-bottom: 10px; }
     .wl-input {
-      flex: 1;
-      font-family: var(--font-body);
-      font-size: 0.9375rem;
-      padding: 13px 18px;
-      border: 1.5px solid var(--border);
-      border-right: none;
-      background: var(--surface);
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.3s;
+      flex: 1; font-family: 'Inter', sans-serif;
+      font-size: 0.9rem; padding: 13px 16px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-right: none; color: var(--text);
+      outline: none; transition: border-color 0.3s;
       -webkit-appearance: none;
     }
-    .wl-input::placeholder { color: var(--hover); }
-    .wl-input:focus        { border-color: var(--accent-blue); }
+    .wl-input::placeholder { color: var(--dim); }
+    .wl-input:focus { border-color: var(--blue); }
     .wl-btn {
-      font-family: var(--font-body);
-      font-size: 0.9375rem;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      padding: 13px 22px;
-      background: var(--text);
-      color: var(--bg);
-      border: 1.5px solid var(--text);
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.3s, border-color 0.3s;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem; font-weight: 500; letter-spacing: 0.03em;
+      padding: 13px 22px; background: var(--text); color: var(--bg);
+      border: 1px solid var(--text); cursor: pointer; white-space: nowrap;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
     }
-    .wl-btn:hover { background: var(--accent-blue); border-color: var(--accent-blue); }
-    .form-note    { font-size: 0.8125rem; opacity: 0.42; font-style: italic; }
+    .wl-btn:hover { background: var(--blue); border-color: var(--blue); color: white; }
+    .form-note { font-size: 0.78rem; color: var(--dim); font-style: italic; }
 
-    @media (max-width: 768px) {
-      .waitlist-inner { grid-template-columns: 1fr; gap: 36px; }
-      .form-row       { flex-direction: column; }
-      .wl-input       { border-right: 1.5px solid var(--border); border-bottom: none; }
+    .platform-note {
+      margin-top: 48px; padding-top: 28px; border-top: 1px solid var(--border);
+    }
+    .platform-label {
+      font-size: 0.7rem; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--dim); margin-bottom: 9px;
+    }
+    .platform-text { font-size: 0.875rem; color: var(--muted); line-height: 1.65; }
+    .platform-status {
+      margin-top: 10px; font-size: 0.8rem;
+      color: var(--dim); font-style: italic;
     }
 
-    /* ── Modal ───────────────────────────────────── */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(44, 42, 41, 0.52);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      z-index: 2000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
+    @media (max-width: 800px) {
+      .product-inner { grid-template-columns: 1fr; gap: 52px; }
+      .waitlist-col { padding-top: 0; }
+      .form-row { flex-direction: column; }
+      .wl-input {
+        border-right: 1px solid var(--border);
+        border-bottom: none;
+      }
     }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
 
-    .modal {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      max-width: 480px;
-      width: 100%;
-      padding: 48px;
-      position: relative;
-      box-shadow: 0 8px 48px rgba(0,0,0,0.14);
-      transform: translateY(18px) scale(0.98);
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    /* ── Footer ──────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
     }
-    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
-
-    .modal-close {
-      position: absolute;
-      top: 18px; right: 18px;
-      background: none; border: none;
-      cursor: pointer;
-      width: 32px; height: 32px;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--hover);
+    .footer-inner {
+      max-width: var(--max); margin: 0 auto; padding: 30px var(--pad);
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    }
+    .footer-logo {
+      font-family: 'Quicksand', sans-serif; font-weight: 600;
+      font-size: 0.9rem; color: var(--text); opacity: 0.4;
+    }
+    .footer-logo .dot { color: var(--blue); opacity: 1; }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a {
+      font-size: 0.8rem; color: var(--dim);
       transition: color 0.2s;
     }
-    .modal-close:hover { color: var(--text); }
+    .footer-links a:hover { color: var(--muted); }
+    .footer-copy { font-size: 0.75rem; color: var(--dim); }
 
-    .modal-title {
-      font-family: var(--font-head);
-      font-size: 2rem;
-      font-weight: 400;
-      line-height: 1.15;
-      margin-bottom: 10px;
+    @media (max-width: 560px) {
+      .footer-inner { flex-direction: column; align-items: flex-start; gap: 14px; }
     }
-    .modal-sub  { font-size: 0.9rem; line-height: 1.72; opacity: 0.62; margin-bottom: 30px; }
-    .modal-form { display: flex; flex-direction: column; gap: 11px; }
-    .modal-input {
-      font-family: var(--font-body);
-      font-size: 0.9375rem;
-      padding: 13px 17px;
-      border: 1.5px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      outline: none;
-      width: 100%;
-      transition: border-color 0.3s;
-      -webkit-appearance: none;
+
+    /* ── Reveal ──────────────────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .modal-input::placeholder { color: var(--hover); }
-    .modal-input:focus        { border-color: var(--accent-blue); }
-    .modal-btn {
-      font-family: var(--font-body);
-      font-size: 0.9375rem;
-      font-weight: 500;
-      padding: 14px 24px;
-      background: var(--accent-blue);
-      color: white;
-      border: none;
-      cursor: pointer;
-      width: 100%;
-      transition: background 0.3s, box-shadow 0.3s;
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .d1 { transition-delay: 0.10s; }
+    .d2 { transition-delay: 0.20s; }
+    .d3 { transition-delay: 0.32s; }
+    .d4 { transition-delay: 0.44s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
     }
-    .modal-btn:hover { background: #5a7d9e; box-shadow: 0 4px 20px rgba(108,145,178,0.3); }
-    .modal-note { font-size: 0.8125rem; opacity: 0.38; text-align: center; font-style: italic; }
-
-    /* ── SVG theme — CSS props override SVG presentation attributes ── */
-    /* Hero animation: outer/dashed rings use border color */
-    .logo-anim > circle:nth-child(1),
-    .logo-anim > circle:nth-child(3) { stroke: var(--border); }
-    /* Orbiting dot */
-    .logo-anim .anim-orbit > circle  { fill: var(--accent-blue); }
-    /* Crescent */
-    .logo-anim .anim-breathe > circle { stroke: var(--accent-blue); fill: none; }
-    .logo-anim .anim-breathe > path:first-child { fill: var(--accent-blue); stroke: var(--accent-blue); }
-    .logo-anim .anim-breathe > path:last-child  { stroke: var(--accent-blue); fill: none; }
-    /* Centre dots */
-    .logo-anim > circle:nth-child(6),
-    .logo-anim > circle:nth-child(7) { fill: var(--accent-blue); }
-    /* Needle & thread */
-    .logo-anim .anim-float > line,
-    .logo-anim .anim-float > ellipse { stroke: var(--accent-green); }
-    .logo-anim .anim-float > path    { stroke: var(--accent-green); fill: none; }
-    .logo-anim .anim-float > circle  { fill: var(--accent-green); }
-
-    /* Philosophy icons */
-    .philo-icon path, .philo-icon rect, .philo-icon line { stroke: var(--accent-green); }
-
-    /* No-JS fallback — keep content readable if scripts are blocked */
     @media (scripting: none) {
       .reveal { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── Dark mode overrides ── */
-    @media (prefers-color-scheme: dark) {
-      .mockup-window {
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 20px 56px rgba(0,0,0,0.4);
-      }
-      .mockup-window:hover {
-        box-shadow: 0 4px 8px rgba(0,0,0,0.35), 0 28px 72px rgba(0,0,0,0.5);
-      }
-      .product-cta:hover {
-        box-shadow: 0 6px 24px rgba(122, 172, 200, 0.22);
-      }
-      .modal {
-        box-shadow: 0 8px 48px rgba(0,0,0,0.5);
-        background: var(--surface);
-      }
-      .modal-overlay {
-        background: rgba(0, 0, 0, 0.7);
-      }
-      .mic-wrap svg [stroke="#6C91B2"] { stroke: #7AACC8; }
-      .mic-wrap svg [fill="#6C91B2"]   { fill:   #7AACC8; }
-      .mic-wrap svg [stroke="#8A9A7A"] { stroke: #94A882; }
-      .mic-wrap svg [fill="#8A9A7A"]   { fill:   #94A882; }
-      /* Mic body and lock body: hardcoded light fills need dark equivalents */
-      .mic-wrap svg [fill="#EEF3F8"]   { fill: var(--surface); }
-      .mic-wrap svg [fill="#F9F7F4"]   { fill: var(--bg); }
-      /* Feature list checkmark — update to dark-mode green */
-      .feature-item::before {
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='9' cy='9' r='8' stroke='%2394A882' stroke-width='1.2'/%3E%3Cpath d='M5.5 9L8 11.5L12.5 7' stroke='%2394A882' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      }
     }
   </style>
 </head>
@@ -560,29 +347,19 @@
 
 <a href="#main" class="skip-link">Skip to main content</a>
 
-<!-- ══ NAVIGATION ══════════════════════════════════════ -->
+<!-- NAV -->
 <nav class="nav" id="nav" role="navigation" aria-label="Main navigation">
   <div class="container">
     <div class="nav-inner">
-
       <a href="index.html" class="nav-logo" aria-label="QuietCraft.tech — home">
-        <svg class="logo-icon" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-          <circle cx="13" cy="13" r="11" stroke="#6C91B2" stroke-width="1.4"/>
-          <path d="M13 3C8.03 3 4 7.03 4 12S8.03 21 13 21C10.7 19.6 9.1 17.2 9.1 12C9.1 6.8 10.7 4.4 13 3Z"
-                fill="#6C91B2" opacity="0.8"/>
-          <circle cx="17.5" cy="9.5" r="1.5" fill="#8A9A7A"/>
-        </svg>
-        quietcraft<span class="logo-dot"> .tech</span>
+        <img src="assets/logo/logo-icon.png" alt="" width="26" height="26">
+        quietcraft<span class="dot"> .tech</span>
       </a>
-
       <ul class="nav-links" role="list">
-        <li><a href="#quietscribe">Work</a></li>
-        <li><a href="#approach">Approach</a></li>
         <li><a href="#quietscribe">QuietScribe</a></li>
         <li><a href="blog/">Journal</a></li>
         <li><a href="mailto:hello@quietcraft.tech">Hello</a></li>
       </ul>
-
       <button class="hamburger" id="hamburger"
               aria-label="Open navigation" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -593,338 +370,101 @@
 
 <div class="mobile-menu" id="mobile-menu"
      role="dialog" aria-label="Navigation menu" aria-modal="true">
-  <a href="#quietscribe">Work</a>
-  <a href="#approach">Approach</a>
   <a href="#quietscribe">QuietScribe</a>
   <a href="blog/">Journal</a>
   <a href="mailto:hello@quietcraft.tech">Hello</a>
 </div>
 
-<!-- ══ MAIN CONTENT ════════════════════════════════════ -->
 <main id="main">
 
-  <!-- ── HERO ──────────────────────────────────────── -->
-  <section class="hero" aria-labelledby="hero-headline">
-    <div class="container">
-      <div class="hero-inner">
-
-        <div class="hero-text">
-          <p class="hero-eyebrow reveal">A small software studio</p>
-          <h1 class="hero-headline reveal reveal-delay-1" id="hero-headline">
-            Quiet software,<br><em>carefully made.</em>
-          </h1>
-          <p class="hero-subhead reveal reveal-delay-2">
-            We build calm, human-centered tools for people who make things —
-            tools that respect your focus, your privacy, and your time.
-          </p>
-          <a href="#quietscribe" class="btn-outline reveal reveal-delay-3"
-             aria-label="See QuietScribe, our offline transcription tool">
-            See QuietScribe
-            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M3 8H13M9 4L13 8L9 12"
-                    stroke="currentColor" stroke-width="1.4"
-                    stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </a>
-        </div>
-
-        <div class="hero-visual" aria-hidden="true">
-          <svg class="logo-anim" viewBox="0 0 340 340" fill="none">
-            <!-- Outer ring -->
-            <circle cx="170" cy="170" r="150" stroke="#E5E2DC" stroke-width="1"/>
-            <!-- Orbiting dot -->
-            <g class="anim-orbit">
-              <circle cx="170" cy="22" r="4.5" fill="#6C91B2" opacity="0.45"/>
-            </g>
-            <!-- Dashed inner ring -->
-            <circle cx="170" cy="170" r="108" stroke="#E5E2DC" stroke-width="0.75"
-                    stroke-dasharray="3 9"/>
-            <!-- Crescent — breathing -->
-            <g class="anim-breathe">
-              <circle cx="170" cy="170" r="76" fill="none" stroke="#6C91B2"
-                      stroke-width="1.5" opacity="0.28"/>
-              <path d="M170 94C131 94 99 126 99 165C99 204 131 236 170 236
-                       C152 227 141 197 141 165C141 133 152 103 170 94Z"
-                    fill="#6C91B2" opacity="0.16"/>
-              <path d="M170 94C131 94 99 126 99 165C99 204 131 236 170 236
-                       C152 227 141 197 141 165C141 133 152 103 170 94Z"
-                    fill="none" stroke="#6C91B2" stroke-width="1.5" opacity="0.58"/>
-            </g>
-            <!-- Needle + thread — floating -->
-            <g class="anim-float" style="transform-origin: 210px 128px">
-              <line x1="204" y1="112" x2="220" y2="148"
-                    stroke="#8A9A7A" stroke-width="1.8" stroke-linecap="round"/>
-              <ellipse cx="204.5" cy="113" rx="2.5" ry="3.5" fill="none"
-                       stroke="#8A9A7A" stroke-width="1.2"
-                       transform="rotate(-22 204.5 113)"/>
-              <path d="M203 116 Q193 134 188 156 Q183 174 191 190"
-                    stroke="#8A9A7A" stroke-width="0.9" stroke-linecap="round"
-                    fill="none" stroke-dasharray="2 5" opacity="0.55"/>
-              <circle cx="191" cy="191" r="2.2" fill="#8A9A7A" opacity="0.45"/>
-            </g>
-            <!-- Centre -->
-            <circle cx="170" cy="170" r="4.5" fill="#6C91B2" opacity="0.35"/>
-            <circle cx="170" cy="170" r="1.8" fill="#6C91B2"/>
-          </svg>
-        </div>
-
-      </div>
+  <!-- HERO -->
+  <section aria-labelledby="hero-headline">
+    <div class="hero">
+      <p class="hero-label reveal">A small software studio</p>
+      <h1 class="hero-headline reveal d1" id="hero-headline">
+        Quiet software,<br><em>carefully made.</em>
+      </h1>
+      <p class="hero-sub reveal d2">
+        We build calm, offline tools for people who do careful work —
+        tools that respect your focus, your privacy, and your time.
+      </p>
+      <a href="#quietscribe" class="hero-cta reveal d3"
+         aria-label="See QuietScribe, our offline transcription tool">
+        See QuietScribe
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8H13M9 4L13 8L9 12"
+                stroke="currentColor" stroke-width="1.4"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
     </div>
   </section>
 
-  <div class="section-divider"></div>
+  <hr class="divider">
 
-  <!-- ── PHILOSOPHY / APPROACH ─────────────────────── -->
-  <section class="philosophy" id="approach" aria-labelledby="philosophy-label">
-    <div class="container">
-      <p class="section-label" id="philosophy-label">Our approach</p>
-      <div class="philosophy-grid">
-
-        <article class="philo-item reveal">
-          <svg class="philo-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-            <path d="M32 8C28 12 20 14 16 22C14 26 13 31 13 31"
-                  stroke="#8A9A7A" stroke-width="1.4" stroke-linecap="round"/>
-            <path d="M32 8C24 10 18 18 14 28"
-                  stroke="#8A9A7A" stroke-width="1.4" stroke-linecap="round" opacity="0.38"/>
-            <path d="M22 16L16 22" stroke="#8A9A7A" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
-            <path d="M26 13L19 25" stroke="#8A9A7A" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
-            <path d="M19 20L13 31" stroke="#8A9A7A" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/>
-          </svg>
-          <h2 class="philo-title">Gentle process</h2>
-          <p class="philo-text">
-            We build at a measured pace — no crunch, no hype cycles.
-            Good software takes time to get right, and we'd rather
-            ship something careful than something fast.
-          </p>
-        </article>
-
-        <article class="philo-item reveal reveal-delay-1">
-          <svg class="philo-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-            <rect x="8" y="22" width="18" height="6" rx="2"
-                  stroke="#8A9A7A" stroke-width="1.4"/>
-            <rect x="20" y="10" width="10" height="8" rx="3"
-                  stroke="#8A9A7A" stroke-width="1.4"/>
-            <line x1="16" y1="22" x2="20" y2="14"
-                  stroke="#8A9A7A" stroke-width="1.4" stroke-linecap="round"/>
-          </svg>
-          <h2 class="philo-title">Honest craft</h2>
-          <p class="philo-text">
-            Software that feels good in your hands — not clever for its own sake.
-            Every interaction is considered. Every feature earns its place.
-            Nothing is added to impress.
-          </p>
-        </article>
-
-        <article class="philo-item reveal reveal-delay-2">
-          <svg class="philo-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-            <line x1="20" y1="32" x2="20" y2="18"
-                  stroke="#8A9A7A" stroke-width="1.4" stroke-linecap="round"/>
-            <path d="M20 22C20 22 14 20 13 14C13 14 19 12 22 18"
-                  stroke="#8A9A7A" stroke-width="1.3" stroke-linecap="round"
-                  stroke-linejoin="round" fill="none"/>
-            <path d="M20 18C20 18 23 14 28 14C28 14 28 20 22 22"
-                  stroke="#8A9A7A" stroke-width="1.3" stroke-linecap="round"
-                  stroke-linejoin="round" fill="none"/>
-            <path d="M16 32 Q20 30 24 32"
-                  stroke="#8A9A7A" stroke-width="1.2" stroke-linecap="round"
-                  fill="none" opacity="0.4"/>
-          </svg>
-          <h2 class="philo-title">Steady growth</h2>
-          <p class="philo-text">
-            Sustainable tools for sustainable work. We're not chasing growth
-            at any cost — we're building something we're proud of, for people
-            who value quality over noise.
-          </p>
-        </article>
-
-      </div>
-    </div>
-  </section>
-
-  <div class="section-divider"></div>
-
-  <!-- ── QUIETSCRIBE ───────────────────────────────── -->
-  <section class="product" id="quietscribe" aria-labelledby="product-headline">
-    <div class="container">
+  <!-- PRODUCT + WAITLIST -->
+  <section id="quietscribe" aria-labelledby="product-name">
+    <div class="product">
       <div class="product-inner">
 
-        <!-- Left: text -->
-        <div class="product-text">
-          <p class="product-badge reveal">
-            <span class="badge-dot" aria-hidden="true"></span>
+        <div>
+          <p class="product-tag reveal">
+            <span class="pulse" aria-hidden="true"></span>
             Featured product · In development
           </p>
-          <h2 class="product-headline reveal reveal-delay-1" id="product-headline">
-            QuietScribe —<br><em>Offline transcription<br>for private conversations.</em>
+          <h2 class="product-name reveal d1" id="product-name">
+            QuietScribe —<br>
+            <em>Offline transcription<br>for private conversations.</em>
           </h2>
-          <p class="product-subhead reveal reveal-delay-2">
+          <p class="product-desc reveal d2">
             No cloud. No accounts. No per-minute billing.<br>
             Your words never leave your device.
           </p>
-          <div class="price-block reveal reveal-delay-2"
-               aria-label="Price: $79 one-time, unlimited hours forever">
-            <span class="price-amount">$79</span>
-            <span class="price-once">one-time</span>
-            <span class="price-divider" aria-hidden="true"></span>
-            <span class="price-unlimited">Unlimited hours, forever</span>
+          <div class="price reveal d2"
+               aria-label="$79 one-time payment, unlimited hours forever">
+            <span class="price-num">$79</span>
+            <span class="price-info">
+              one-time payment
+              <span>Unlimited hours, forever</span>
+            </span>
           </div>
-          <ul class="features-list reveal reveal-delay-3" aria-label="QuietScribe features">
-            <li class="feature-item">100% offline — runs on your Windows PC, nothing uploaded anywhere</li>
-            <li class="feature-item">Powered by whisper.cpp — small, medium &amp; large-v3 models (GPU + CPU)</li>
-            <li class="feature-item">Speaker diarization — Speaker 1 &amp; 2, renameable to real names</li>
-            <li class="feature-item">Synced transcript editor — click any sentence to jump in the audio</li>
-            <li class="feature-item">Export to DOCX, TXT, SRT, VTT, and CSV with timestamps &amp; labels</li>
-            <li class="feature-item">Batch queue — drop many files at once and walk away</li>
+          <ul class="features reveal d3" aria-label="QuietScribe features">
+            <li>100% offline — runs on your Windows PC, nothing uploaded anywhere</li>
+            <li>Powered by whisper.cpp — small, medium &amp; large-v3 models (GPU + CPU)</li>
+            <li>Speaker diarization — renameable to real names</li>
+            <li>Synced editor — click any sentence to jump in the audio</li>
+            <li>Export to DOCX, TXT, SRT, VTT, and CSV</li>
+            <li>Batch queue — drop many files at once and walk away</li>
           </ul>
-          <button class="product-cta reveal reveal-delay-3"
-                  id="open-modal" aria-haspopup="dialog">
-            Join the quiet waitlist
-          </button>
-          <p class="product-status reveal">Coming early 2027 · Windows PC</p>
         </div>
 
-        <!-- Right: visual -->
-        <div class="product-visual reveal reveal-delay-2" aria-label="QuietScribe illustration and app preview">
-
-          <!-- Microphone + lock illustration -->
-          <div class="mic-wrap">
-            <svg viewBox="0 0 180 200" fill="none"
-                 style="width:130px; margin:0 auto;"
-                 role="img" aria-label="Microphone with privacy lock icon">
-              <!-- Mic body -->
-              <rect x="68" y="20" width="44" height="80" rx="22"
-                    fill="#EEF3F8" stroke="#6C91B2" stroke-width="2"/>
-              <line x1="80" y1="50" x2="100" y2="50" stroke="#6C91B2"
-                    stroke-width="1.2" opacity="0.38" stroke-linecap="round"/>
-              <line x1="78" y1="62" x2="102" y2="62" stroke="#6C91B2"
-                    stroke-width="1.2" opacity="0.38" stroke-linecap="round"/>
-              <line x1="80" y1="74" x2="100" y2="74" stroke="#6C91B2"
-                    stroke-width="1.2" opacity="0.38" stroke-linecap="round"/>
-              <!-- Arm + post + base -->
-              <path d="M90 100 C55 100 44 80 44 60"
-                    stroke="#6C91B2" stroke-width="2" stroke-linecap="round" fill="none"/>
-              <path d="M90 100 C125 100 136 80 136 60"
-                    stroke="#6C91B2" stroke-width="2" stroke-linecap="round" fill="none"/>
-              <line x1="90" y1="100" x2="90" y2="148"
-                    stroke="#6C91B2" stroke-width="2" stroke-linecap="round"/>
-              <path d="M60 148 Q90 156 120 148"
-                    stroke="#6C91B2" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-              <!-- Lock -->
-              <rect x="108" y="26" width="36" height="28" rx="5"
-                    fill="#F9F7F4" stroke="#8A9A7A" stroke-width="1.8"/>
-              <path d="M116 26V20C116 14 132 14 132 20V26"
-                    stroke="#8A9A7A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-              <circle cx="126" cy="39" r="3.8" fill="#8A9A7A" opacity="0.6"/>
-              <rect x="124.5" y="41" width="3" height="5" rx="1"
-                    fill="#8A9A7A" opacity="0.6"/>
-            </svg>
-          </div>
-
-          <!-- App mockup window -->
-          <div class="mockup-window" role="img"
-               aria-label="QuietScribe interface showing drag-and-drop and file queue">
-            <div class="mockup-bar" aria-hidden="true">
-              <span class="mdot mdot-r"></span>
-              <span class="mdot mdot-y"></span>
-              <span class="mdot mdot-g"></span>
-              <span class="mbar-title">QuietScribe</span>
-            </div>
-            <div class="mockup-body" aria-hidden="true">
-              <div class="dropzone">
-                <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-                  <rect x="3" y="5" width="20" height="16" rx="3"
-                        stroke="#AFA9A0" stroke-width="1.4"/>
-                  <path d="M9 13H17M13 9V17" stroke="#AFA9A0"
-                        stroke-width="1.4" stroke-linecap="round"/>
-                </svg>
-                <p class="dz-label">Drop audio or video files here</p>
-                <p class="dz-sub">MP3, WAV, MP4, M4A, FLAC &amp; more</p>
-              </div>
-              <div class="file-queue">
-                <div class="file-row">
-                  <div class="ficon" style="background:rgba(108,145,178,0.14)"></div>
-                  <span class="fname">interview_dr_chen.mp3</span>
-                  <span class="fstat fstat-done">✓ Done</span>
-                </div>
-                <div class="file-row">
-                  <div class="ficon" style="background:rgba(138,154,122,0.2)"></div>
-                  <span class="fname">focus_group_may.wav</span>
-                  <span class="fstat fstat-active">Transcribing…</span>
-                </div>
-                <div class="file-row">
-                  <div class="ficon" style="background:rgba(175,169,160,0.1)"></div>
-                  <span class="fname">client_session_3.m4a</span>
-                  <span class="fstat fstat-queue">Queued</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="for-whom-box">
-            <p class="for-whom-label">Made for</p>
-            <p class="for-whom-text">
-              Journalists · Qualitative researchers · PhD students ·
-              Lawyers &amp; paralegals · Therapists · HR investigators
-            </p>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="section-divider"></div>
-
-  <!-- ── TESTIMONIAL ───────────────────────────────── -->
-  <section class="testimonial" aria-label="Testimonial">
-    <div class="container">
-      <div class="testimonial-inner">
-        <span class="tq-open reveal" aria-hidden="true">"</span>
-        <blockquote>
-          <p class="tq-quote reveal reveal-delay-1">
-            QuietCraft's tools don't yell at me. They just work,
-            quietly and beautifully.
-          </p>
-          <footer>
-            <cite class="tq-attr reveal reveal-delay-2">
-              A. Researcher, University of Edinburgh
-            </cite>
-          </footer>
-        </blockquote>
-      </div>
-    </div>
-  </section>
-
-  <div class="section-divider"></div>
-
-  <!-- ── WAITLIST ──────────────────────────────────── -->
-  <section class="waitlist" id="waitlist" aria-labelledby="waitlist-headline">
-    <div class="container">
-      <div class="waitlist-inner">
-
-        <div class="reveal">
-          <h2 class="waitlist-headline" id="waitlist-headline">
+        <div class="waitlist-col reveal d2" id="waitlist">
+          <h2 class="waitlist-head">
             Be the first to hear<br>about QuietScribe.
           </h2>
           <p class="waitlist-sub">
             We'll write only when there's something real to share — a launch date,
             a beta invite, or a meaningful update. No newsletters. No noise.
           </p>
-        </div>
-
-        <div class="reveal reveal-delay-2">
-          <form class="waitlist-form" id="waitlist-form"
-                data-netlify="true" name="waitlist">
+          <form id="waitlist-form" data-netlify="true" name="waitlist">
             <input type="hidden" name="form-name" value="waitlist">
             <div class="form-row">
               <label for="wl-email" class="sr-only">Email address</label>
               <input class="wl-input" type="email" id="wl-email" name="email"
                      placeholder="your@email.com"
                      required autocomplete="email" aria-required="true">
-              <button class="wl-btn" type="submit">Notify Me</button>
+              <button class="wl-btn" type="submit">Notify me</button>
             </div>
-            <p class="form-note">No spam. Unsubscribe any time. We respect your inbox.</p>
+            <p class="form-note">No spam. Unsubscribe any time.</p>
           </form>
+          <div class="platform-note">
+            <p class="platform-label">Made for</p>
+            <p class="platform-text">
+              Journalists · Qualitative researchers · PhD students ·
+              Lawyers &amp; paralegals · Therapists · HR investigators
+            </p>
+            <p class="platform-status">Coming early 2027 · Windows PC</p>
+          </div>
         </div>
 
       </div>
@@ -933,62 +473,23 @@
 
 </main>
 
-<!-- ══ FOOTER ══════════════════════════════════════════ -->
-<footer class="footer" role="contentinfo">
-  <div class="container">
-    <div class="footer-inner">
-      <a href="index.html" class="footer-logo" aria-label="QuietCraft.tech home">
-        quietcraft<span class="logo-dot"> .tech</span>
-      </a>
-      <nav class="footer-links" aria-label="Footer navigation">
-        <a href="blog/">Journal</a>
-        <a href="mailto:hello@quietcraft.tech">hello@quietcraft.tech</a>
-      </nav>
-      <p class="footer-copy">© 2026 QuietCraft.tech</p>
-    </div>
+<footer role="contentinfo">
+  <div class="footer-inner">
+    <span class="footer-logo">quietcraft<span class="dot"> .tech</span></span>
+    <nav class="footer-links" aria-label="Footer navigation">
+      <a href="blog/">Journal</a>
+      <a href="mailto:hello@quietcraft.tech">hello@quietcraft.tech</a>
+    </nav>
+    <p class="footer-copy">© 2026 QuietCraft.tech</p>
   </div>
 </footer>
 
-<!-- ══ MODAL — Waitlist ═════════════════════════════════ -->
-<div class="modal-overlay" id="modal-overlay"
-     role="dialog" aria-modal="true"
-     aria-labelledby="modal-title" aria-hidden="true">
-  <div class="modal">
-    <button class="modal-close" id="modal-close" aria-label="Close">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-        <path d="M4 4L14 14M14 4L4 14"
-              stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    </button>
-    <h2 class="modal-title" id="modal-title">Join the quiet waitlist</h2>
-    <p class="modal-sub">
-      We're building QuietScribe for people who need private transcription without
-      compromise. Leave your email and we'll reach out when it's ready.
-    </p>
-    <form class="modal-form" id="modal-form"
-          data-netlify="true" name="waitlist">
-      <input type="hidden" name="form-name" value="waitlist">
-      <label for="modal-email" class="sr-only">Email address</label>
-      <input class="modal-input" type="email" id="modal-email" name="email"
-             placeholder="your@email.com"
-             required autocomplete="email" aria-required="true">
-      <button class="modal-btn" type="submit">
-        Send me a note when it's ready
-      </button>
-      <p class="modal-note">No spam, ever. Just a quiet note when the time is right.</p>
-    </form>
-  </div>
-</div>
-
-<!-- ══ SCRIPTS ══════════════════════════════════════════ -->
 <script>
-  // Nav scroll state
   const nav = document.getElementById('nav');
   window.addEventListener('scroll', () => {
     nav.classList.toggle('scrolled', window.scrollY > 40);
   }, { passive: true });
 
-  // Hamburger menu
   const hamburger = document.getElementById('hamburger');
   const mobileMenu = document.getElementById('mobile-menu');
   hamburger.addEventListener('click', () => {
@@ -1006,78 +507,46 @@
     });
   });
 
-  // Scroll-triggered reveal
-  const revealObserver = new IntersectionObserver(entries => {
+  const revealObs = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {
         e.target.classList.add('visible');
-        revealObserver.unobserve(e.target);
+        revealObs.unobserve(e.target);
       }
     });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+  }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 
-  // Hero reveals fire immediately on load
   document.querySelectorAll('.hero .reveal').forEach((el, i) => {
-    setTimeout(() => el.classList.add('visible'), 80 + i * 110);
+    setTimeout(() => el.classList.add('visible'), 80 + i * 100);
   });
 
-  // Modal
-  const overlay   = document.getElementById('modal-overlay');
-  const closeBtn  = document.getElementById('modal-close');
-  const openBtn   = document.getElementById('open-modal');
-
-  function openModal() {
-    overlay.classList.add('open');
-    overlay.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => document.getElementById('modal-email').focus(), 60);
-  }
-  function closeModal() {
-    overlay.classList.remove('open');
-    overlay.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-    openBtn.focus();
-  }
-  openBtn.addEventListener('click', openModal);
-  closeBtn.addEventListener('click', closeModal);
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
-  });
-
-  // Netlify Forms — AJAX submission, no page redirect
-  function setupForm(form) {
-    if (!form) return;
-    const btn = form.querySelector(‘button[type="submit"]’);
-    const original = btn.textContent;
-    form.addEventListener(‘submit’, async e => {
+  const form = document.getElementById('waitlist-form');
+  if (form) {
+    const btn = form.querySelector('button[type="submit"]');
+    form.addEventListener('submit', async e => {
       e.preventDefault();
-      btn.textContent = ‘Sending…’;
+      btn.textContent = 'Sending…';
       btn.disabled = true;
       try {
-        const res = await fetch(‘/’, {
-          method: ‘POST’,
-          headers: { ‘Content-Type’: ‘application/x-www-form-urlencoded’ },
+        const res = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams(new FormData(form)).toString()
         });
         if (res.ok) {
-          btn.textContent = ‘You’re on the list ✓’;
+          btn.textContent = 'You\'re on the list ✓';
           form.reset();
-          if (overlay && overlay.classList.contains(‘open’))
-            setTimeout(() => closeModal(), 1400);
         } else {
-          btn.textContent = ‘Something went wrong — try again’;
+          btn.textContent = 'Something went wrong — try again';
           btn.disabled = false;
         }
       } catch {
-        btn.textContent = original;
+        btn.textContent = 'Notify me';
         btn.disabled = false;
       }
     });
   }
-  setupForm(document.getElementById(‘waitlist-form’));
-  setupForm(document.getElementById(‘modal-form’));
 </script>
 
 </body>
